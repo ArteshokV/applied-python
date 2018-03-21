@@ -4,6 +4,7 @@
 def process(data, events, car):
     '''
         ТУТ ДОЛЖЕН БЫТЬ ВАШ КОД
+        hey code1
     '''
     for train in data:
         print(train['name'])
