@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 from parse import *
+from urllib.parse import urlparse
 
 def toInt(num):
     try:
@@ -58,7 +59,12 @@ def parse(
 ):
     file = open('log.log')
     for line in file:
-        print(parseLine(line))
+        parsed_line = parseLine(line)
+        if(parsed_line != 0):
+            o = urlparse(parsed_line['url_adress'])
+            #o.netloc
+            #o.path
+            print(o.netloc + o.path)
 
 
     file.close()
