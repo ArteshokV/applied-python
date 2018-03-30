@@ -63,10 +63,8 @@ def checkAndModifyLogLine(parsed_line, ignore_files, ignore_urls, start_at, stop
     if ignore_files and (parsed_url.path.find('.') != -1): #if '.' is found in path - its file and we ignore
         return 0
 
-    if len(ignore_urls):
-        for url in ignore_urls:
-            if (parsed_url.scheme + '://' + parsed_url.netloc + parsed_url.path) == url:  #if ignore url is found in line - we ignore
-                return 0
+    if (parsed_url.scheme + '://' + parsed_url.netloc + parsed_url.path) in ignore_urls:
+        return 0
 
     date_object =parseDate(parsed_line['date'])
     if date_object == -1:  #INVALID DATE FORMAT, IGNORE URL
