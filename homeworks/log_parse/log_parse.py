@@ -93,10 +93,6 @@ def checkAndModifyLogLine(parsed_line, ignore_files, ignore_urls, start_at, stop
 
     return 1
 
-def getTop5(URLs_dictionary):
-    resultArray = sorted(URLs_dictionary.values(), reverse= True)
-    return resultArray[0:5]
-
 def parse(
     ignore_files=False,
     ignore_urls=[],
@@ -131,7 +127,7 @@ def parse(
             URLs_dictionary[key] = int(statistics.mean(value))
     #print(URLs_dictionary)
 
-    returnArray = getTop5(URLs_dictionary)
+    returnArray = sorted(URLs_dictionary.values(), reverse= True)[0:5]
     file.close()
 
     return returnArray
