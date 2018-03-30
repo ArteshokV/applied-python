@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import datetime
 import statistics
+import operator
 from parse import *
 from urllib.parse import urlparse
 
@@ -93,16 +94,8 @@ def checkAndModifyLogLine(parsed_line, ignore_files, ignore_urls, start_at, stop
     return 1
 
 def getTop5(URLs_dictionary):
-    returnArray = []
-    resetArray = []
-    for i in range(0, 5):
-        resetArray.append(max(URLs_dictionary, key=URLs_dictionary.get))
-        returnArray.append(URLs_dictionary[resetArray[i]])
-        URLs_dictionary[resetArray[i]] = -1
-    # resetting changes back
-    for i in range(0, 5):
-        URLs_dictionary[resetArray[i]] = returnArray[i]
-    return returnArray
+    resultArray = sorted(URLs_dictionary.values(), reverse= True)
+    return resultArray[0:5]
 
 def parse(
     ignore_files=False,
