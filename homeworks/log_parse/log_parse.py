@@ -9,6 +9,12 @@ def toInt(num):
         return int(num)
     except ValueError:
         return -1
+def parseDate(date_string):
+    try:
+        return datetime.datetime.strptime(date_string, "%d/%b/%Y %H:%M:%S")
+    except ValueError:
+        return -1
+
 
 def parseLine(line):
     if line[0] == '[':
@@ -58,19 +64,21 @@ def checkAndModifyLogLine(parsed_line, ignore_files, ignore_urls, start_at, stop
 
     if len(ignore_urls):
         for url in ignore_urls:
-            if parsed_line['url_adress'].find(url) != -1:  #if ignore url is found in line - we ignore
+            if (parsed_url.scheme + '://' + parsed_url.netloc + parsed_url.path) == url:  #if ignore url is found in line - we ignore
                 return 0
 
+    date_object =parseDate(parsed_line['date'])
+    if date_object == -1:  #INVALID DATE FORMAT, IGNORE URL
+        return 0
+
     if start_at:
-        start_date_object = datetime.datetime.strptime(start_at, "%d/%b/%Y %H:%M:%S") #IF FORMAT IS CORRECT
-        date_object = datetime.datetime.strptime(parsed_line['date'], "%d/%b/%Y %H:%M:%S")
-        if start_date_object > date_object:
+        start_date_object = parseDate(start_at)    # IF FORMAT IS CORRECT
+        if (start_date_object > date_object) and (start_date_object != -1):
             return 0
 
     if stop_at:
-        stop_date_object = datetime.datetime.strptime(stop_at, "%d/%b/%Y %H:%M:%S")  # IF FORMAT IS CORRECT
-        date_object = datetime.datetime.strptime(parsed_line['date'], "%d/%b/%Y %H:%M:%S")
-        if stop_date_object < date_object:
+        stop_date_object = parseDate(stop_at)  # IF FORMAT IS CORRECT
+        if (stop_date_object < date_object) and (stop_date_object != -1):
             return 0
 
     if request_type:
