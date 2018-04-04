@@ -6,7 +6,6 @@ class HitsMatchTestCase(TestCase):
     def test_scenario(self):
         players = [Player('A'), Player('B'), Player('C')]
         m = HitsMatch(3, players)
-
         self._first_hole(m)
         self._second_hole(m)
 
