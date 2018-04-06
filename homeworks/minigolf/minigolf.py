@@ -13,7 +13,7 @@ class Match(metaclass=ABCMeta):
     def finished(self):
         return self._finished
 
-    def __init__(self,number_of_holes, palyers_array):
+    def __init__(self, number_of_holes, palyers_array):
         self._players_array = palyers_array
         self._finished = False
         if not self._players_array:
@@ -23,6 +23,8 @@ class Match(metaclass=ABCMeta):
         self._number_of_holes = number_of_holes
         self._number_of_players = len(palyers_array)
         self._results_table = list(list(None for _ in self._players_array) for _ in range(number_of_holes))
+        if number_of_holes > self._number_of_players:
+            raise RuntimeError('Too much holes')
 
     def get_winners(self):
         if not self._finished:
@@ -39,6 +41,7 @@ class Match(metaclass=ABCMeta):
                 winner_points = min(points_array)
             else:
                 winner_points = max(points_array)
+            # To be ordered:
             for idn, points in enumerate(points_array):
                 if (winner_points == points):
                     return_array.append(self._players_array[idn])
@@ -106,7 +109,7 @@ class HitsMatch(Match):
 
         if success:
             self._players_array[self._current_player].hits_no_more = 1
-        if self._results_table[self._current_hole][self._current_player] == 9:
+        elif self._results_table[self._current_hole][self._current_player] == 9:
             current_hole_array[self._current_player] += 1
             self._players_array[self._current_player].hits_no_more = 1
         self._set_next_player_and_hole_if_needed()
@@ -127,6 +130,13 @@ class HolesMatch(Match):
             current_hole_array[self._current_player] = 1
             self._players_array[self._current_player].hits_no_more = 1
             self._was_goal = True
+            # Previous players do not hit no more!
+            no_more_hit_player_id = self._current_hole
+            while no_more_hit_player_id != self._current_player:
+                current_hole_array[no_more_hit_player_id] = 0 if not current_hole_array[no_more_hit_player_id] else current_hole_array[no_more_hit_player_id]
+                self._players_array[no_more_hit_player_id].hits_no_more = 1
+                no_more_hit_player_id = no_more_hit_player_id + 1 if no_more_hit_player_id != self._number_of_players-1\
+                    else 0
         else:
             self._number_of_fails += 1
             if self._was_goal:
