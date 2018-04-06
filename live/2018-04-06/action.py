@@ -1,14 +1,17 @@
 class Action:
-    def __init__(self, name, resources):
+    def __init__(self, name, amount_resource_pairs):
         self._name = name
-        self._resources = resources
+        self._amount_resource_pairs = amount_resource_pairs
 
-    def can_consume(self, dt, to_consume=1):
-        return all(resource.can_consume(dt, to_consume) for resource in self._resources)
+    def _can_consume(self, dt):
+        return all(
+            resource.can_consume(dt, amount)
+            for amount, resource in self._amount_resource_pairs
+        )
 
-    def consume(self, dt, to_consume=1):
-        if not self.can_consume(dt, to_consume):
+    def consume(self, dt):
+        if not self._can_consume(dt):
             raise RuntimeError("Can't consume")
 
-        for resource in self._resources:
-            resource.consume(dt, to_consume)
+        for amount, resource in self._amount_resource_pairs:
+            resource.consume(dt, amount)
