@@ -1,8 +1,11 @@
 from abc import ABCMeta, abstractmethod
+
+
 class Player:
     def __init__(self, name):
         self.name = name
         self.hits_no_more = 0
+
 
 class Match(metaclass=ABCMeta):
 
@@ -21,7 +24,6 @@ class Match(metaclass=ABCMeta):
         self._number_of_players = len(palyers_array)
         self._results_table = list(list(None for _ in self._players_array) for _ in range(number_of_holes))
 
-
     def get_winners(self):
         if not self._finished:
             raise RuntimeError('Not finished')
@@ -29,10 +31,10 @@ class Match(metaclass=ABCMeta):
             points_array = []
             return_array = []
             for playernum in range(self._number_of_players):
-                sum = 0
+                points_sum = 0
                 for holenum in range(self._number_of_holes):
-                    sum += self._results_table[holenum][playernum]
-                points_array.append(sum)
+                    points_sum += self._results_table[holenum][playernum]
+                points_array.append(points_sum)
             if type(self) == HitsMatch:
                 winner_points = min(points_array)
             else:
@@ -43,10 +45,10 @@ class Match(metaclass=ABCMeta):
             return return_array
 
     def get_table(self):
-        return_array = []
-        #appending names
+        return_array = list()
+        # appending names
         return_array.append(tuple(item.name for item in self._players_array))
-        #appending results from stored table
+        # appending results from stored table
         for hole in range(self._number_of_holes):
             if hole == self._current_hole:
                 temp_array = []
@@ -82,6 +84,7 @@ class Match(metaclass=ABCMeta):
             self._switch_to_next_hole()
             return 1
 
+        # For HitsMatch player selection
         while self._players_array[self._current_player].hits_no_more == 1:
             self._current_player = self._current_player + 1 if self._current_player != self._number_of_players-1 else 0
         return 0
@@ -91,13 +94,12 @@ class Match(metaclass=ABCMeta):
         pass
 
 
-
-
 class HitsMatch(Match):
 
     def hit(self, success=False):
-        if self._finished == True:
+        if self._finished:
             raise RuntimeError('Already finished')
+
         current_hole_array = self._results_table[self._current_hole]
         current_hole_array[self._current_player] = current_hole_array[self._current_player] + 1 if \
             current_hole_array[self._current_player] else 1
@@ -107,7 +109,6 @@ class HitsMatch(Match):
         if self._results_table[self._current_hole][self._current_player] == 9:
             current_hole_array[self._current_player] += 1
             self._players_array[self._current_player].hits_no_more = 1
-
         self._set_next_player_and_hole_if_needed()
 
 
@@ -118,7 +119,7 @@ class HolesMatch(Match):
         self._was_goal = False
 
     def hit(self, success=False):
-        if self._finished == True:
+        if self._finished:
             raise RuntimeError('Already finished')
 
         current_hole_array = self._results_table[self._current_hole]
@@ -128,7 +129,7 @@ class HolesMatch(Match):
             self._was_goal = True
         else:
             self._number_of_fails += 1
-            if self._was_goal == True:
+            if self._was_goal:
                 self._players_array[self._current_player].hits_no_more = 1
                 current_hole_array[self._current_player] = 0
 
