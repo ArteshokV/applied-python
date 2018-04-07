@@ -9,6 +9,9 @@ class Player:
 
 class Match(metaclass=ABCMeta):
 
+    MAX_HITS_FOR_HOLES = 10
+    MAX_POINTS_FOR_HITS = 10-1
+
     @property
     def finished(self):
         return self._finished
@@ -23,8 +26,8 @@ class Match(metaclass=ABCMeta):
         self._number_of_holes = number_of_holes
         self._number_of_players = len(palyers_array)
         self._results_table = list(list(None for _ in self._players_array) for _ in range(number_of_holes))
-        if number_of_holes > self._number_of_players:
-            raise RuntimeError('Too much holes')
+        if number_of_holes < self._number_of_players:
+            raise RuntimeError('Too much players')
 
     def get_winners(self):
         if not self._finished:
@@ -72,7 +75,8 @@ class Match(metaclass=ABCMeta):
         self._current_hole += 1
         if self._current_hole == self._number_of_holes:
             self._finished = True
-        self._current_player = self._current_hole
+
+        self._current_player = self._current_hole % self._number_of_players
 
     def _everybody_finished_hole(self):
         for player in self._players_array:
@@ -109,7 +113,7 @@ class HitsMatch(Match):
 
         if success:
             self._players_array[self._current_player].hits_no_more = 1
-        elif self._results_table[self._current_hole][self._current_player] == 9:
+        elif self._results_table[self._current_hole][self._current_player] == self.MAX_POINTS_FOR_HITS:
             current_hole_array[self._current_player] += 1
             self._players_array[self._current_player].hits_no_more = 1
         self._set_next_player_and_hole_if_needed()
@@ -143,7 +147,7 @@ class HolesMatch(Match):
                 self._players_array[self._current_player].hits_no_more = 1
                 current_hole_array[self._current_player] = 0
 
-        if self._number_of_fails == self._number_of_players*10:
+        if self._number_of_fails == self._number_of_players*self.MAX_HITS_FOR_HOLES:
             for playerind, player in enumerate(self._players_array):
                 player.hits_no_more = 1
                 current_hole_array[playerind] = 0

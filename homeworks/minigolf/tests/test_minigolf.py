@@ -13,11 +13,9 @@ class HwInitFuncTestCase(TestCase):
         with self.assertRaises(TypeError):
             classObj = HolesMatch()
 
-        with self.assertRaises(RuntimeError):
-            classObj = HitsMatch(10, players)
 
-        with self.assertRaises(RuntimeError):
-            classObj = HolesMatch(10, players)
+        with self.assertRaises(TypeError):
+            classObj = HitsMatch(players)
 
         classHits = HitsMatch(len(players), players)
         self.assertEqual(classHits._results_table, [
@@ -140,7 +138,7 @@ class HwGetTableFuncTestCase(TestCase):
 class HwSWtoNextHoleFuncTestCase(TestCase):
     def testNextHole(self):
         players = [Player('A'), Player('B'), Player('C')]
-        classHits = HitsMatch(len(players), players)
+        classHits = HitsMatch(10, players)
 
         classHits._current_hole = 1
         for player in classHits._players_array:
@@ -155,9 +153,16 @@ class HwSWtoNextHoleFuncTestCase(TestCase):
         self.assertEqual(classHits._finished, False)
         self.assertEqual(classHits._current_player, 2)
 
-        # Switch to the end of game
+        # Switch to the holenum that is > than number of players, e.g. next player = 0
         classHits._switch_to_next_hole()
         self.assertEqual(classHits._current_hole, 3)
+        self.assertEqual(classHits._finished, False)
+        self.assertEqual(classHits._current_player, 0)
+
+        # Switch to the end of game
+        classHits._current_hole = 9
+        classHits._switch_to_next_hole()
+        self.assertEqual(classHits._current_hole, 10)
         self.assertEqual(classHits._finished, True)
 
 
