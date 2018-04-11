@@ -11,6 +11,7 @@ class Match(metaclass=ABCMeta):
 
     MAX_HITS_FOR_HOLES = 10
     MAX_POINTS_FOR_HITS = 10-1
+    _WINNERS_FUNCTION = min
 
     @property
     def finished(self):
@@ -26,8 +27,6 @@ class Match(metaclass=ABCMeta):
         self._number_of_holes = number_of_holes
         self._number_of_players = len(palyers_array)
         self._results_table = list(list(None for _ in self._players_array) for _ in range(number_of_holes))
-        if number_of_holes < self._number_of_players:
-            raise RuntimeError('Too much players')
 
     def get_winners(self):
         if not self._finished:
@@ -40,10 +39,9 @@ class Match(metaclass=ABCMeta):
                 for holenum in range(self._number_of_holes):
                     points_sum += self._results_table[holenum][playernum]
                 points_array.append(points_sum)
-            if type(self) == HitsMatch:
-                winner_points = min(points_array)
-            else:
-                winner_points = max(points_array)
+
+            winner_points = self._WINNERS_FUNCTION(points_array)
+
             # To be ordered:
             for idn, points in enumerate(points_array):
                 if (winner_points == points):
@@ -91,9 +89,6 @@ class Match(metaclass=ABCMeta):
             self._switch_to_next_hole()
             return 1
 
-        # For HitsMatch player selection
-        while self._players_array[self._current_player].hits_no_more == 1:
-            self._current_player = self._current_player + 1 if self._current_player != self._number_of_players-1 else 0
         return 0
 
     @abstractmethod
@@ -102,6 +97,8 @@ class Match(metaclass=ABCMeta):
 
 
 class HitsMatch(Match):
+
+    _WINNERS_FUNCTION = min
 
     def hit(self, success=False):
         if self._finished:
@@ -116,10 +113,17 @@ class HitsMatch(Match):
         elif self._results_table[self._current_hole][self._current_player] == self.MAX_POINTS_FOR_HITS:
             current_hole_array[self._current_player] += 1
             self._players_array[self._current_player].hits_no_more = 1
+
         self._set_next_player_and_hole_if_needed()
+        # For HitsMatch player selection
+        while self._players_array[self._current_player].hits_no_more == 1:
+            self._current_player = self._current_player + 1 if self._current_player != self._number_of_players - 1 else 0
 
 
 class HolesMatch(Match):
+
+    _WINNERS_FUNCTION = max
+
     def __init__(self, number_of_holes, palyers_array):
         Match.__init__(self, number_of_holes, palyers_array)
         self._number_of_fails = 0
@@ -147,7 +151,7 @@ class HolesMatch(Match):
                 self._players_array[self._current_player].hits_no_more = 1
                 current_hole_array[self._current_player] = 0
 
-        if self._number_of_fails == self._number_of_players*self.MAX_HITS_FOR_HOLES:
+        if self._number_of_fails == self._number_of_players * self.MAX_HITS_FOR_HOLES:
             for playerind, player in enumerate(self._players_array):
                 player.hits_no_more = 1
                 current_hole_array[playerind] = 0
