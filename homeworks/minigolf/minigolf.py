@@ -9,8 +9,8 @@ class Player:
 
 class Match(metaclass=ABCMeta):
 
-    MAX_HITS_FOR_HOLES = 10
-    MAX_POINTS_FOR_HITS = 10-1
+    MAX_HITS_PER_HOLES = 10
+    MAX_POINTS_FOR_HITS = MAX_HITS_PER_HOLES-1
     _WINNERS_FUNCTION = min
 
     @property
@@ -151,7 +151,7 @@ class HolesMatch(Match):
                 self._players_array[self._current_player].hits_no_more = 1
                 current_hole_array[self._current_player] = 0
 
-        if self._number_of_fails == self._number_of_players * self.MAX_HITS_FOR_HOLES:
+        if self._number_of_fails == self._number_of_players * self.MAX_HITS_PER_HOLES:
             for playerind, player in enumerate(self._players_array):
                 player.hits_no_more = 1
                 current_hole_array[playerind] = 0
